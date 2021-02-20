@@ -1,3 +1,4 @@
+let _ = require('underscore');
 // 6 - this will return a random number no bigger than `max`, as a string
 // we will also doing our query parameter validation here
 const jokes = [
@@ -18,11 +19,23 @@ const jokes = [
   { q: 'What did the ocean say to the sailboat?', a: 'Nothing, it just waved.' },
   { q: 'What do you get when you cross a snowman with a vampire?', a: 'Frostbite' },
 ];
-const getJokeJSON = () => JSON.stringify(jokes[Math.floor(Math.random() * jokes.length)]);
+const getJokeJSON = (limit) => {
+  let clampedLimit = limit;
+  if (clampedLimit < 1) {
+    clampedLimit = 1;
+  }
+  if (clampedLimit > jokes.length) {
+    clampedLimit = jokes.length;
+  }
 
-const getRandomJokeResponse = (request, response) => {
+  const shuffled = _.shuffle(jokes);
+  const firstJokes = _.first(shuffled, clampedLimit);
+  return JSON.stringify(firstJokes);
+};
+
+const getRandomJokeResponse = (request, response, params) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
-  response.write(getJokeJSON());
+  response.write(getJokeJSON(params.limit));
   response.end();
 };
 

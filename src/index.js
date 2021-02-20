@@ -1,6 +1,6 @@
 // 1 - pull in the HTTP server module
 const http = require('http');
-
+const query = require('querystring');
 // 2 - pull in URL and query modules (for URL parsing)
 const url = require('url');
 const htmlResponses = require('./htmlResponses');
@@ -20,11 +20,12 @@ const onRequest = (request, response) => {
   // console.log(request.headers);
   const parsedUrl = url.parse(request.url);
   const { pathname } = parsedUrl;
+  const params = query.parse(parsedUrl.query);
   console.log('parsedUrl=', parsedUrl);
   console.log('pathname=', pathname);
 
   if (urlStruct[pathname]) {
-    urlStruct[pathname](request, response);
+    urlStruct[pathname](request, response, params);
   } else {
     urlStruct.notFound(request, response);
   }
