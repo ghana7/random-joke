@@ -1,4 +1,4 @@
-let _ = require('underscore');
+const _ = require('underscore');
 // 6 - this will return a random number no bigger than `max`, as a string
 // we will also doing our query parameter validation here
 const jokes = [
@@ -19,7 +19,7 @@ const jokes = [
   { q: 'What did the ocean say to the sailboat?', a: 'Nothing, it just waved.' },
   { q: 'What do you get when you cross a snowman with a vampire?', a: 'Frostbite' },
 ];
-const getJokeJSON = (limit) => {
+const getJokes = (limit) => {
   let clampedLimit = limit;
   if (clampedLimit < 1) {
     clampedLimit = 1;
@@ -30,13 +30,68 @@ const getJokeJSON = (limit) => {
 
   const shuffled = _.shuffle(jokes);
   const firstJokes = _.first(shuffled, clampedLimit);
-  return JSON.stringify(firstJokes);
+  return firstJokes;
 };
 
-const getRandomJokeResponse = (request, response, params) => {
-  response.writeHead(200, { 'Content-Type': 'application/json' });
-  response.write(getJokeJSON(params.limit));
+const getJoke = () => jokes[Math.floor(Math.random() * jokes.length)];
+
+const getJokesJSON = (limit) => JSON.stringify(getJokes(limit));
+
+const getJokeJSON = () => JSON.stringify(getJoke());
+
+const getJokesXML = (limit) => {
+  const randJokes = getJokes(limit);
+  let xml = `<jokes>
+  `;
+  randJokes.forEach((joke) => {
+    xml += `<joke>
+              <q>${joke.q}</q>
+              <a>${joke.a}</a>
+            </joke>`;
+  });
+  xml += '</jokes>';
+  return xml;
+};
+
+const getJokeXML = () => {
+  const joke = getJoke();
+  return `<joke>
+            <q>${joke.q}</q>
+            <a>${joke.a}</a>
+          </joke>`;
+};
+
+const respond = (response, type, content) => {
+  response.writeHead(200, { 'Content-Type': type });
+  response.write(content);
   response.end();
 };
 
+const getRandomJokeResponse = (request, response, params, acceptedTypes) => {
+  let content;
+  let type;
+  if (acceptedTypes[0] === 'text/xml') {
+    content = getJokeXML();
+    type = 'text/xml';
+  } else {
+    content = getJokeJSON();
+    type = 'application/json';
+  }
+  respond(response, type, content);
+};
+
+const getRandomJokesResponse = (request, response, params, acceptedTypes) => {
+  let content;
+  let type;
+  if (acceptedTypes[0] === 'text/xml') {
+    content = getJokesXML(params.limit);
+    type = 'text/xml';
+  } else {
+    content = getJokesJSON(params.limit);
+    type = 'application/json';
+  }
+  respond(response, type, content);
+};
+
 module.exports.getRandomJokeResponse = getRandomJokeResponse;
+module.exports.getRandomJokesResponse = getRandomJokesResponse;
