@@ -12,6 +12,8 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 const urlStruct = {
   '/random-joke': jsonResponses.getRandomJokeResponse,
   '/random-jokes': jsonResponses.getRandomJokesResponse,
+  '/default-styles.css': htmlResponses.getDefaultStyles,
+  '/joke-client.html': htmlResponses.getJokeClient,
   notFound: htmlResponses.get404Response,
 };
 // 7 - this is the function that will be called every time a client request comes in
@@ -28,7 +30,7 @@ const onRequest = (request, response) => {
   console.log('pathname=', pathname);
 
   if (urlStruct[pathname]) {
-    urlStruct[pathname](request, response, params, acceptedTypes);
+    urlStruct[pathname](request, response, params, acceptedTypes, request.method);
   } else {
     urlStruct.notFound(request, response);
   }
